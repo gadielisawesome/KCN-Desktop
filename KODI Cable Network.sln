@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KODI Cable Network", "KODI Cable Network\KODI Cable Network.csproj", "{E2F009CE-F7E6-47B0-B010-3F7B17D21A50}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F2D1CB2F-AA0F-4445-9351-4684E33FD856}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E2F009CE-F7E6-47B0-B010-3F7B17D21A50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2F009CE-F7E6-47B0-B010-3F7B17D21A50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2F009CE-F7E6-47B0-B010-3F7B17D21A50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2F009CE-F7E6-47B0-B010-3F7B17D21A50}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F96913A7-239F-4398-8112-0959AE08B34D}
+	EndGlobalSection
+EndGlobal
