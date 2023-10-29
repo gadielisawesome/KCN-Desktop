@@ -11,7 +11,7 @@ namespace KODI_Cable_Network
     {
         private static LibVLC _libVLC;
         private static MediaPlayer _mediaPlayer;
-        private static VideoView videoView = new VideoView
+        private static readonly VideoView videoView = new VideoView
         {
             Dock = DockStyle.Fill,
         };

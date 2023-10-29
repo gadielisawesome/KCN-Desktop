@@ -35,9 +35,9 @@
             // 
             // loadPictureBox
             // 
-            this.loadPictureBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(84)))), ((int)(((byte)(84)))), ((int)(((byte)(84)))));
+            this.loadPictureBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(0)))));
             this.loadPictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.loadPictureBox.Image = global::KODI_Cable_Network.Properties.Resources.PLPA;
+            this.loadPictureBox.Image = global::KODI_Cable_Network.Properties.Resources.LOAD;
             this.loadPictureBox.Location = new System.Drawing.Point(0, 0);
             this.loadPictureBox.Name = "loadPictureBox";
             this.loadPictureBox.Size = new System.Drawing.Size(969, 561);

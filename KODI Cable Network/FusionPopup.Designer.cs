@@ -31,15 +31,14 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FusionPopup));
             this.ContentHolderPanel = new System.Windows.Forms.Panel();
-            this.CloseThisWindow = new System.Windows.Forms.Timer(this.components);
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.CloseThisWindow = new System.Windows.Forms.Timer(this.components);
             this.ContentHolderPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // ContentHolderPanel
             // 
-            this.ContentHolderPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ContentHolderPanel.Controls.Add(this.pictureBox1);
             this.ContentHolderPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ContentHolderPanel.Location = new System.Drawing.Point(0, 0);
@@ -47,23 +46,23 @@
             this.ContentHolderPanel.Size = new System.Drawing.Size(768, 512);
             this.ContentHolderPanel.TabIndex = 0;
             // 
-            // CloseThisWindow
-            // 
-            this.CloseThisWindow.Enabled = true;
-            this.CloseThisWindow.Interval = 1000;
-            this.CloseThisWindow.Tick += new System.EventHandler(this.CloseThisWindow_Tick);
-            // 
             // pictureBox1
             // 
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Image = global::KODI_Cable_Network.Properties.Resources.desktopbanner;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(766, 510);
+            this.pictureBox1.Size = new System.Drawing.Size(768, 512);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.WaitOnLoad = true;
+            // 
+            // CloseThisWindow
+            // 
+            this.CloseThisWindow.Enabled = true;
+            this.CloseThisWindow.Interval = 1000;
+            this.CloseThisWindow.Tick += new System.EventHandler(this.CloseThisWindow_Tick);
             // 
             // FusionPopup
             // 

@@ -57,7 +57,7 @@ namespace KODI_Cable_Network
         [STAThread]
         static void Main()
         {
-            //new LivePlayer { Tag = "https://live.kodicable.net/hlscfsp/cfsp/index.m3u8" }.ShowDialog();
+            //new Test().ShowDialog();
             //return;
 
             Application.ThreadException += (sender, e) =>
@@ -77,12 +77,6 @@ namespace KODI_Cable_Network
 
             FontLoader();
 
-            if (Properties.Settings.Default.FirstPowerOn)
-            {
-                Properties.Settings.Default.FirstPowerOn = false;
-                new FusionPopup().ShowDialog();
-            }
-
             if (!Directory.Exists("libvlc"))
             {
                 MessageBox.Show("libvlc isn't available. Please re-download KCN Desktop.", "Required Reference Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -90,6 +84,107 @@ namespace KODI_Cable_Network
             }
 
             // Add MOTD or something for the title bar
+
+            string[] arguments = Environment.GetCommandLineArgs();
+
+            if (arguments.Length > 0)
+            {
+                int argument_count = 0;
+                foreach (string arg in arguments)
+                {
+                    switch (argument_count)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            if (arg == "-play")
+                            {
+                                if (arguments.Length >= 2)
+                                {
+                                    string JSON = GetAPIData();
+
+                                    if (JSON == "")
+                                    {
+                                        MessageBox.Show("Could not get data from KCN.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
+
+                                    StreamResponse response = JsonConvert.DeserializeObject<StreamResponse>(JSON);
+
+                                    //string input = "https://certainurl.com/example.html|This is some title text|M";
+
+                                    string BNUPipeFormat = string.Empty;
+                                    Icon icon = null;
+                                    Bitmap bitmap = null;
+
+                                    foreach (Stream stream in response.streams)
+                                    {
+                                        if (stream.name.ToUpper() == arguments[2].ToUpper())
+                                        {
+                                            BNUPipeFormat = $"{stream.url}|{stream.title}|{stream.rating}";
+                                            try
+                                            {
+                                                using (WebClient webClient = new WebClient())
+                                                {
+                                                    string imageUrl = $"https://kodicable.net/images/channel_logos/{stream.name.ToLower()}.png";
+                                                    byte[] data = webClient.DownloadData(imageUrl);
+                                                    if (data != null && data.Length > 0)
+                                                    {
+                                                        using (MemoryStream memoryStream = new MemoryStream(data))
+                                                        {
+                                                            bitmap = new Bitmap(memoryStream);
+                                                            icon = Icon.FromHandle(bitmap.GetHicon());
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        icon = null;
+                                                    }
+                                                }
+                                            }
+                                            catch (Exception)
+                                            {
+                                                icon = null;
+                                            }
+                                            break;
+                                        }
+                                    }
+
+                                    if (string.IsNullOrEmpty(BNUPipeFormat))
+                                    {
+                                        MessageBox.Show("Channel not found.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
+
+                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
+
+                                    return;
+                                }
+                                else
+                                {
+                                    MessageBox.Show("The provided arguments are invalid.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                            }
+                            if (arg == "-reset")
+                            {
+                                Properties.Settings.Default.Reset();
+                                MessageBox.Show("Application reset successfully.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                return;
+                            }
+                            MessageBox.Show("The arguments are invalid.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                    }
+                    argument_count++;
+                }
+            }
+
+            if (Properties.Settings.Default.FirstPowerOn)
+            {
+                Properties.Settings.Default.FirstPowerOn = false;
+                Properties.Settings.Default.Save();
+                new FusionPopup().ShowDialog();
+            }
 
             OpenStreamUI();
 
@@ -206,7 +301,7 @@ namespace KODI_Cable_Network
                 //    };
                 //}));
 
-                foreach (var stream in response.streams)
+                foreach (Stream stream in response.streams)
                 {
                     Console.WriteLine($"Name: {stream.name}");
                     Console.WriteLine($"URL: {stream.url}");
@@ -496,10 +591,7 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
-                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
-                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
-                                    OpenStreamUI();
+                                    strList.Invoke((MethodInvoker)(() => strList.PlayContent(BNUPipeFormat, icon, bitmap)));
                                     break;
                                 case MouseButtons.Right:
                                     break;
