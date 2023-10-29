@@ -7,9 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using static KODI_Cable_Network.Program;
 
 namespace KODI_Cable_Network
 {
@@ -52,11 +51,8 @@ namespace KODI_Cable_Network
         //    }
         //}
 
-        [DllImport("gdi32.dll")]
-        public static extern int AddFontResourceA(string lpszFilename);
-
-        [DllImport("user32.dll")]
-        public static extern int SendMessage(int hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+        public static Timer timer = new Timer();
+        public static bool PlayerOpen = false;
 
         [STAThread]
         static void Main()
@@ -95,15 +91,13 @@ namespace KODI_Cable_Network
 
             // Add MOTD or something for the title bar
 
-            string jsonResponse = GetAPIData();
+            OpenStreamUI();
 
-            if (jsonResponse == "")
-            {
-                MessageBox.Show("Could not get data from KCN.", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            StartConfiguration(jsonResponse);
+            timer.Tick += (sender, args) => {
+                if (!PlayerOpen) OpenStreamUI();
+            };
+            timer.Interval = 300000;
+            timer.Start();
 
             Application.Run();
         }
@@ -145,10 +139,22 @@ namespace KODI_Cable_Network
 
         static StreamList strList;
 
-        static private void StartConfiguration(string JSON)
+        /// <summary>
+        /// Opens the stream UI. If already open, refreshes the window.
+        /// </summary>
+        /// <returns></returns>
+        public static bool OpenStreamUI()
         {
             try
             {
+                string JSON = GetAPIData();
+
+                if (JSON == "")
+                {
+                    MessageBox.Show("Could not get data from KCN.", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+
                 StreamResponse response = JsonConvert.DeserializeObject<StreamResponse>(JSON);
 
                 int panelY = 5;
@@ -164,13 +170,41 @@ namespace KODI_Cable_Network
                 //    // https://adultswim-vodlive.cdn.turner.com/live/rick-and-morty/stream.m3u8|Rick and Morty [Adult Swim]|M
                 //}
 
+                Control[] control = null;
+
                 if (!(strList is null))
                 {
-                    strList.Dispose();
-                    strList = null;
+                    strList.Invoke(new MethodInvoker(() =>
+                    {
+                        strList.AutoScroll = false;
+                        foreach (Control ctrl in strList.Controls)
+                        {
+                            if (ctrl.Name == "streamPanel")
+                            {
+                                Array.Resize(ref control, control.Length + 1);
+                                control[control.Length - 1] = ctrl;
+                            }
+                        }
+                    }));
                 }
-                strList = new StreamList();
-                strList.Show();
+                else
+                {
+                    strList = new StreamList();
+                    strList.Show();
+                }
+
+                //strList.Invoke(new MethodInvoker(() =>
+                //{
+                //    // Properties.Resources.KCN_mini
+                //    PictureBox waitingPictureBox = new PictureBox
+                //    {
+                //        BackColor = Color.Black,
+                //        Location = new Point(0, 0),
+                //        Size = new Size(240, 135),
+                //        SizeMode = PictureBoxSizeMode.Zoom,
+                //        Image = Properties.Resources.KCN_mini
+                //    };
+                //}));
 
                 foreach (var stream in response.streams)
                 {
@@ -271,9 +305,7 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
-                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
-                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
+                                    strList.Invoke((MethodInvoker)(() => strList.PlayContent(BNUPipeFormat, icon, bitmap)));
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -308,9 +340,7 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
-                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
-                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
+                                    strList.Invoke((MethodInvoker)(() => strList.PlayContent(BNUPipeFormat, icon, bitmap)));
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -430,9 +460,7 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
-                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
-                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
+                                    strList.Invoke((MethodInvoker)(() => strList.PlayContent(BNUPipeFormat, icon, bitmap)));
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -471,6 +499,7 @@ namespace KODI_Cable_Network
                                     strList.Invoke((MethodInvoker)(() => strList.Hide()));
                                     new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
                                     strList.Invoke((MethodInvoker)(() => strList.Show()));
+                                    OpenStreamUI();
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -491,18 +520,36 @@ namespace KODI_Cable_Network
 
                         // Increase the Y-position for the next panel
                         panelY += 140; // You can adjust the value to control the vertical spacing
+
+                        //if (control.Length > 0)
+                        //{
+                        //    Control firstPanel = control[0];
+                        //    strList.Controls.Remove(firstPanel);
+                        //    firstPanel.Dispose();
+
+                        //    for (int i = 0; i < control.Length - 1; i++)
+                        //    {
+                        //        control[i] = control[i + 1];
+                        //    }
+
+                        //    Array.Resize(ref control, control.Length - 1);
+                        //}
                     }));
+                    Application.DoEvents();
                 }
 
                 strList.Invoke(new MethodInvoker(() =>
                 {
                     strList.AutoScroll = true;
+                    strList.IsLoading(false);
                 }));
+
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error deserializing JSON: " + ex.Message);
-                return;
+                return false;
             }
         }
 

@@ -60,6 +60,7 @@ namespace KODI_Cable_Network
                         break;
                 }
             };
+            Program.PlayerOpen = true;
         }
 
         private string channel_title = "Not Provided";
@@ -78,7 +79,7 @@ namespace KODI_Cable_Network
                 string rating = parts[2];
 
                 channel_title = title;
-                channel_rating = rating;
+                channel_rating = rating.ToUpper();
 
                 Console.WriteLine($"Opening {link}");
                 Console.WriteLine($"Title:");
@@ -329,6 +330,7 @@ namespace KODI_Cable_Network
             {
                 _mediaPlayer = null;
             }
+            Program.PlayerOpen = false;
         }
 
         private async void TitleBar_Tick(object sender, EventArgs e)
@@ -337,7 +339,7 @@ namespace KODI_Cable_Network
             {
                 if (_mediaPlayer.State != VLCState.Ended && _mediaPlayer.State != VLCState.Stopped && _mediaPlayer.State != VLCState.Error && _mediaPlayer.State != VLCState.NothingSpecial)
                 {
-                    this.Text = $"{channel_title} | {_mediaPlayer.State} at {_mediaPlayer.Fps} FPS - {_mediaPlayer.Time}ms";
+                    this.Text = $"{channel_title} | Rated {channel_rating} | {_mediaPlayer.State} at {_mediaPlayer.Fps} FPS - {_mediaPlayer.Time}ms";
                 }
                 else
                 {
