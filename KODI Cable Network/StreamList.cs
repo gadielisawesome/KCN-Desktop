@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace KODI_Cable_Network
@@ -30,6 +31,27 @@ namespace KODI_Cable_Network
             this.Invoke((MethodInvoker)(() => this.IsLoading(true)));
             Application.DoEvents();
             Program.OpenStreamUI();
+        }
+
+        private void StreamList_Load(object sender, System.EventArgs e)
+        {
+            //this.Paint += (sender_, event_args) =>
+            //{
+            //    foreach (Control ctrl in this.Controls)
+            //    {
+            //        try
+            //        {
+            //            if (ctrl.Tag.ToString() == "MainPanel")
+            //            {
+            //                ControlPaint.DrawBorder(event_args.Graphics, ctrl.DisplayRectangle, Color.Red, ButtonBorderStyle.Solid);
+            //            }
+            //        }
+            //        catch (Exception)
+            //        {
+
+            //        }
+            //    }
+            //};
         }
     }
 }

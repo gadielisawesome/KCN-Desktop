@@ -55,7 +55,7 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>kcn-logo.ico</ApplicationIcon>
+    <ApplicationIcon>KCNLogo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LibVLCSharp, Version=3.8.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -128,6 +128,7 @@
     <Compile Include="LivePlayer.Designer.cs">
       <DependentUpon>LivePlayer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Panel.cs" />
     <Compile Include="StreamList.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -214,6 +215,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="KCNLogo.ico" />
+    <None Include="Resources\UnavailableL.png" />
     <None Include="Resources\LOAD.png" />
     <None Include="jingle.wav" />
     <Content Include="kcn-logo.ico" />

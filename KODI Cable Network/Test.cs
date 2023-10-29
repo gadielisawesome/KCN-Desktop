@@ -11,8 +11,10 @@ namespace KODI_Cable_Network
         public Test()
         {
             InitializeComponent();
-            timer = new Timer();
-            timer.Interval = 10; // Set the timer interval in milliseconds
+            timer = new Timer
+            {
+                Interval = 10 // Set the timer interval in milliseconds
+            };
             timer.Tick += timer_Tick;
             startTime = DateTime.Now;
             timer.Start();

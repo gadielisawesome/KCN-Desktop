@@ -62,6 +62,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "KODI Cable Network";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.StreamList_FormClosed);
+            this.Load += new System.EventHandler(this.StreamList_Load);
             ((System.ComponentModel.ISupportInitialize)(this.loadPictureBox)).EndInit();
             this.ResumeLayout(false);
 

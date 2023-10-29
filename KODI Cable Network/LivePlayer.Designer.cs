@@ -34,10 +34,10 @@
             this.BtnFullScreen = new System.Windows.Forms.Button();
             this.BtnClosedCaptions = new System.Windows.Forms.Button();
             this.TitleBar = new System.Windows.Forms.Timer(this.components);
-            this.BtnPlayPause = new System.Windows.Forms.PictureBox();
-            this.LoadingAnimation = new System.Windows.Forms.PictureBox();
             this.HideControls = new System.Windows.Forms.Timer(this.components);
             this.Checker = new System.Windows.Forms.Timer(this.components);
+            this.BtnPlayPause = new System.Windows.Forms.PictureBox();
+            this.LoadingAnimation = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.BtnPlayPause)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.LoadingAnimation)).BeginInit();
             this.SuspendLayout();
@@ -91,6 +91,16 @@
             this.TitleBar.Interval = 1000;
             this.TitleBar.Tick += new System.EventHandler(this.TitleBar_Tick);
             // 
+            // HideControls
+            // 
+            this.HideControls.Interval = 5000;
+            this.HideControls.Tick += new System.EventHandler(this.HideControls_Tick);
+            // 
+            // Checker
+            // 
+            this.Checker.Enabled = true;
+            this.Checker.Interval = 5000;
+            // 
             // BtnPlayPause
             // 
             this.BtnPlayPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -116,16 +126,6 @@
             this.LoadingAnimation.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.LoadingAnimation.TabIndex = 1;
             this.LoadingAnimation.TabStop = false;
-            // 
-            // HideControls
-            // 
-            this.HideControls.Interval = 5000;
-            this.HideControls.Tick += new System.EventHandler(this.HideControls_Tick);
-            // 
-            // Checker
-            // 
-            this.Checker.Enabled = true;
-            this.Checker.Interval = 5000;
             // 
             // LivePlayer
             // 

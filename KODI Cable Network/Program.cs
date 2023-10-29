@@ -186,10 +186,10 @@ namespace KODI_Cable_Network
                 new FusionPopup().ShowDialog();
             }
 
-            OpenStreamUI();
+            if (!OpenStreamUI()) Environment.Exit(0);
 
             timer.Tick += (sender, args) => {
-                if (!PlayerOpen) OpenStreamUI();
+                if (!PlayerOpen) if (!OpenStreamUI()) Application.Exit();
             };
             timer.Interval = 300000;
             timer.Start();
@@ -301,6 +301,8 @@ namespace KODI_Cable_Network
                 //    };
                 //}));
 
+                bool DarkMode = Properties.Settings.Default.DarkMode;
+
                 foreach (Stream stream in response.streams)
                 {
                     Console.WriteLine($"Name: {stream.name}");
@@ -317,6 +319,15 @@ namespace KODI_Cable_Network
 
                     strList.Invoke(new MethodInvoker(() =>
                     {
+                        if (DarkMode)
+                        {
+                            strList.BackColor = Color.FromArgb(255, 0, 0, 0);
+                        }
+                        else
+                        {
+                            strList.BackColor = Color.FromArgb(255, 240, 240, 240);
+                        }
+
                         Font MontserratSemiBoldTitle = null;
                         // 24
                         FontFamily MontSemiBold = FontFamily.Families.FirstOrDefault(f => f.Name == "Montserrat SemiBold");
@@ -388,13 +399,12 @@ namespace KODI_Cable_Network
                         {
                             Width = 947, // Adjust the width as needed
                             Height = 135, // Adjust the height as needed
-                            BackColor = Color.FromArgb(60, 60, 60), // Set the background color
-                            ForeColor = Color.White,
                             Location = new Point(11, panelY), // Set the Y-position
                             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                            AutoSize = false
+                            AutoSize = false,
+                            BorderStyle = BorderStyle.FixedSingle,
+                            Tag = "MainPanel"
                         };
-                        //BackColor = Color.FromArgb(60, 60, 60); // Set the background color
                         streamPanel.MouseClick += (sender, e) =>
                         {
                             switch (e.Button)
@@ -408,6 +418,16 @@ namespace KODI_Cable_Network
                                     break;
                             }
                         };
+                        if (DarkMode)
+                        {
+                            streamPanel.BackColor = Color.FromArgb(60, 60, 60);
+                            streamPanel.ForeColor = Color.White;
+                        }
+                        else
+                        {
+                            streamPanel.BackColor = Color.FromArgb(240, 240, 240);
+                            streamPanel.ForeColor = Color.Black;
+                        }
 
                         // Create a PictureBox for the stream thumbnail
                         PictureBox thumbnailPictureBox = new PictureBox
@@ -425,11 +445,25 @@ namespace KODI_Cable_Network
                         }
                         else
                         {
-                            thumbnailPictureBox.Image = Properties.Resources.Unavailable;
+                            if (DarkMode)
+                            {
+                                thumbnailPictureBox.Image = Properties.Resources.Unavailable;
+                            }
+                            else
+                            {
+                                thumbnailPictureBox.Image = Properties.Resources.UnavailableL;
+                            }
                         }
-
-                        thumbnailPictureBox.InitialImage = Properties.Resources.Unavailable;
-                        thumbnailPictureBox.ErrorImage = Properties.Resources.Unavailable;
+                        if (DarkMode)
+                        {
+                            thumbnailPictureBox.InitialImage = Properties.Resources.Unavailable;
+                            thumbnailPictureBox.ErrorImage = Properties.Resources.Unavailable;
+                        }
+                        else
+                        {
+                            thumbnailPictureBox.InitialImage = Properties.Resources.UnavailableL;
+                            thumbnailPictureBox.ErrorImage = Properties.Resources.UnavailableL;
+                        }
                         thumbnailPictureBox.MouseClick += (sender, e) =>
                         {
                             switch (e.Button)
@@ -444,6 +478,26 @@ namespace KODI_Cable_Network
                             }
                         };
 
+                        // Create a new sub Panel for each stream
+                        Panel subPanel = new Panel
+                        {
+                            Width = 64, // Adjust the width as needed
+                            Height = 32, // Adjust the height as needed
+                            Location = new Point(0, 0), // Set the Y-position
+                            AutoSize = false,
+                            BorderStyle = BorderStyle.None
+                        };
+                        if (DarkMode)
+                        {
+                            subPanel.BackColor = Color.FromArgb(60, 60, 60);
+                            subPanel.ForeColor = Color.White;
+                        }
+                        else
+                        {
+                            subPanel.BackColor = Color.FromArgb(220, 220, 220);
+                            subPanel.ForeColor = Color.Black;
+                        }
+
                         // Create a PictureBox for the stream icon
                         PictureBox iconPictureBox = new PictureBox
                         {
@@ -451,7 +505,7 @@ namespace KODI_Cable_Network
                             Location = new Point(0, 0),
                             Size = new Size(32, 32),
                             SizeMode = PictureBoxSizeMode.Zoom,
-                            BorderStyle = BorderStyle.FixedSingle,
+                            BorderStyle = BorderStyle.None,
                             ImageLocation = $"https://kodicable.net/images/channel_logos/{stream.name.ToLower()}.png",
                             InitialImage = Properties.Resources.KCN_mini,
                             ErrorImage = null
@@ -477,7 +531,9 @@ namespace KODI_Cable_Network
                             Location = new Point(32, 0),
                             Size = new Size(32, 32),
                             SizeMode = PictureBoxSizeMode.Zoom,
-                            BorderStyle = BorderStyle.FixedSingle
+                            BorderStyle = BorderStyle.None,
+                            InitialImage = Properties.Resources.KCN_mini,
+                            ErrorImage = null
                         };
                         switch (stream.rating.ToUpper())
                         {
@@ -497,8 +553,6 @@ namespace KODI_Cable_Network
                                 ratingPictureBox.ImageLocation = $"https://kodicable.net/images/ratings/pending.png";
                                 break;
                         }
-                        ratingPictureBox.InitialImage = Properties.Resources.KCN_mini;
-                        ratingPictureBox.ErrorImage = null;
                         ratingPictureBox.MouseClick += (sender, e) =>
                         {
                             switch (e.Button)
@@ -537,14 +591,28 @@ namespace KODI_Cable_Network
                             // ⏣
                             //titleLabel.Text = Regex.Replace(stream.title, @"\p{Cs} ", "");
                             titleLabel.Text = stream.title;
-                            titleLabel.ForeColor = Color.White;
+                            if (DarkMode)
+                            {
+                                titleLabel.ForeColor = Color.White;
+                            }
+                            else
+                            {
+                                titleLabel.ForeColor = Color.Black;
+                            }
                         }
                         else
                         {
                             titleLabel.Text = "Channel is off the air";
+                            if (DarkMode)
+                            {
+                                titleLabel.ForeColor = Color.LightGray;
+                            }
+                            else
+                            {
+                                streamPanel.ForeColor = Color.Gray;
+                            }
                             titleLabel.ForeColor = Color.Gray;
                         }
-
                         titleLabel.Font = MontserratSemiBoldTitle;
                         titleLabel.Location = new Point(240, 0);
                         titleLabel.Size = new Size(660, 50);
@@ -568,18 +636,43 @@ namespace KODI_Cable_Network
                         Label descriptionLabel = new Label();
                         if (stream.live == "Yes")
                         {
-                            if (stream.description == "" || stream.description is null)
+                            if (string.IsNullOrEmpty(stream.description))
                             {
                                 descriptionLabel.Text = "The channel has not provided a description.";
+                                if (DarkMode)
+                                {
+                                    descriptionLabel.ForeColor = Color.LightGray;
+                                }
+                                else
+                                {
+                                    descriptionLabel.ForeColor = Color.Gray;
+                                }
                                 descriptionLabel.ForeColor = Color.Gray;
                             }
-                            else descriptionLabel.Text = stream.description;
-                            descriptionLabel.ForeColor = Color.White;
+                            else
+                            {
+                                descriptionLabel.Text = stream.description;
+                                if (DarkMode)
+                                {
+                                    descriptionLabel.ForeColor = Color.White;
+                                }
+                                else
+                                {
+                                    descriptionLabel.ForeColor = Color.Black;
+                                }
+                            }
                         }
                         else
                         {
                             descriptionLabel.Text = "No description available while channel is offline.";
-                            descriptionLabel.ForeColor = Color.Gray;
+                            if (DarkMode)
+                            {
+                                descriptionLabel.ForeColor = Color.LightGray;
+                            }
+                            else
+                            {
+                                descriptionLabel.ForeColor = Color.Gray;
+                            }
                         }
                         descriptionLabel.Font = MontserratRegularDescription;
                         descriptionLabel.Location = new Point(242, 40);
@@ -601,8 +694,9 @@ namespace KODI_Cable_Network
                         };
 
                         // Add controls to the streamPanel
-                        streamPanel.Controls.Add(iconPictureBox);
-                        streamPanel.Controls.Add(ratingPictureBox);
+                        subPanel.Controls.Add(iconPictureBox);
+                        subPanel.Controls.Add(ratingPictureBox);
+                        streamPanel.Controls.Add(subPanel);
                         streamPanel.Controls.Add(thumbnailPictureBox);
                         streamPanel.Controls.Add(titleLabel);
                         streamPanel.Controls.Add(descriptionLabel);
