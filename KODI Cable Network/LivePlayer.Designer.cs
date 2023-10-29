@@ -29,12 +29,15 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LivePlayer));
             this.DisplayText = new System.Windows.Forms.Label();
             this.BtnFullScreen = new System.Windows.Forms.Button();
             this.BtnClosedCaptions = new System.Windows.Forms.Button();
             this.TitleBar = new System.Windows.Forms.Timer(this.components);
             this.BtnPlayPause = new System.Windows.Forms.PictureBox();
             this.LoadingAnimation = new System.Windows.Forms.PictureBox();
+            this.HideControls = new System.Windows.Forms.Timer(this.components);
+            this.Checker = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.BtnPlayPause)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.LoadingAnimation)).BeginInit();
             this.SuspendLayout();
@@ -45,7 +48,7 @@
             this.DisplayText.Font = new System.Drawing.Font("Segoe UI", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DisplayText.Location = new System.Drawing.Point(0, 0);
             this.DisplayText.Name = "DisplayText";
-            this.DisplayText.Size = new System.Drawing.Size(624, 441);
+            this.DisplayText.Size = new System.Drawing.Size(624, 321);
             this.DisplayText.TabIndex = 0;
             this.DisplayText.Text = "Waiting";
             this.DisplayText.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
@@ -57,7 +60,7 @@
             this.BtnFullScreen.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.BtnFullScreen.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.BtnFullScreen.ForeColor = System.Drawing.Color.Black;
-            this.BtnFullScreen.Location = new System.Drawing.Point(555, 336);
+            this.BtnFullScreen.Location = new System.Drawing.Point(485, 286);
             this.BtnFullScreen.Name = "BtnFullScreen";
             this.BtnFullScreen.Size = new System.Drawing.Size(64, 30);
             this.BtnFullScreen.TabIndex = 3;
@@ -73,12 +76,12 @@
             this.BtnClosedCaptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.BtnClosedCaptions.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.BtnClosedCaptions.ForeColor = System.Drawing.Color.Black;
-            this.BtnClosedCaptions.Location = new System.Drawing.Point(555, 300);
+            this.BtnClosedCaptions.Location = new System.Drawing.Point(415, 286);
             this.BtnClosedCaptions.Name = "BtnClosedCaptions";
             this.BtnClosedCaptions.Size = new System.Drawing.Size(64, 30);
             this.BtnClosedCaptions.TabIndex = 4;
             this.BtnClosedCaptions.TabStop = false;
-            this.BtnClosedCaptions.Text = "TEXT";
+            this.BtnClosedCaptions.Text = "SNAP";
             this.BtnClosedCaptions.UseVisualStyleBackColor = false;
             this.BtnClosedCaptions.Click += new System.EventHandler(this.BtnSnapshot_Click);
             // 
@@ -94,7 +97,7 @@
             this.BtnPlayPause.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
             this.BtnPlayPause.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.BtnPlayPause.Image = global::KODI_Cable_Network.Properties.Resources.PLPA;
-            this.BtnPlayPause.Location = new System.Drawing.Point(555, 372);
+            this.BtnPlayPause.Location = new System.Drawing.Point(555, 252);
             this.BtnPlayPause.Name = "BtnPlayPause";
             this.BtnPlayPause.Size = new System.Drawing.Size(64, 64);
             this.BtnPlayPause.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -109,17 +112,27 @@
             this.LoadingAnimation.Image = global::KODI_Cable_Network.Properties.Resources.KCN;
             this.LoadingAnimation.Location = new System.Drawing.Point(0, 0);
             this.LoadingAnimation.Name = "LoadingAnimation";
-            this.LoadingAnimation.Size = new System.Drawing.Size(624, 441);
+            this.LoadingAnimation.Size = new System.Drawing.Size(624, 321);
             this.LoadingAnimation.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.LoadingAnimation.TabIndex = 1;
             this.LoadingAnimation.TabStop = false;
+            // 
+            // HideControls
+            // 
+            this.HideControls.Interval = 5000;
+            this.HideControls.Tick += new System.EventHandler(this.HideControls_Tick);
+            // 
+            // Checker
+            // 
+            this.Checker.Enabled = true;
+            this.Checker.Interval = 5000;
             // 
             // LivePlayer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(84)))), ((int)(((byte)(84)))), ((int)(((byte)(84)))));
-            this.ClientSize = new System.Drawing.Size(624, 441);
+            this.ClientSize = new System.Drawing.Size(624, 321);
             this.Controls.Add(this.BtnPlayPause);
             this.Controls.Add(this.BtnClosedCaptions);
             this.Controls.Add(this.BtnFullScreen);
@@ -127,7 +140,9 @@
             this.Controls.Add(this.DisplayText);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.ForeColor = System.Drawing.Color.White;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.MinimumSize = new System.Drawing.Size(640, 360);
             this.Name = "LivePlayer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Tag = "https://localhost/index.m3u8";
@@ -149,5 +164,7 @@
         private System.Windows.Forms.Button BtnClosedCaptions;
         private System.Windows.Forms.Timer TitleBar;
         private System.Windows.Forms.PictureBox BtnPlayPause;
+        private System.Windows.Forms.Timer HideControls;
+        private System.Windows.Forms.Timer Checker;
     }
 }

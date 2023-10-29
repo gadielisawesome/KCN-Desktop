@@ -1,6 +1,6 @@
 ﻿namespace KODI_Cable_Network
 {
-    partial class StreamList
+    partial class Emergency
     {
         /// <summary>
         /// Required designer variable.
@@ -28,24 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StreamList));
             this.SuspendLayout();
             // 
-            // StreamList
+            // Emergency
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(969, 561);
+            this.ClientSize = new System.Drawing.Size(334, 361);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.ForeColor = System.Drawing.Color.Black;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.ForeColor = System.Drawing.Color.White;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MinimumSize = new System.Drawing.Size(985, 600);
-            this.Name = "StreamList";
+            this.Name = "Emergency";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "KODI Cable Network";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.StreamList_FormClosed);
+            this.Text = "Emergency";
             this.ResumeLayout(false);
 
         }
@@ -53,4 +50,3 @@
         #endregion
     }
 }
-

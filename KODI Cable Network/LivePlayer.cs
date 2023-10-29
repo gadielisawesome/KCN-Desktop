@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using LibVLCSharp.Shared;
+﻿using LibVLCSharp.Shared;
 using LibVLCSharp.WinForms;
+using System;
+using System.Drawing;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace KODI_Cable_Network
 {
     public partial class LivePlayer : Form
     {
-        private readonly LibVLC _libVLC;
-        private readonly MediaPlayer _mediaPlayer;
+        private static LibVLC _libVLC;
+        private static MediaPlayer _mediaPlayer;
+        private static VideoView videoView = new VideoView
+        {
+            Dock = DockStyle.Fill,
+        };
 
         public LivePlayer()
         {
@@ -26,13 +24,7 @@ namespace KODI_Cable_Network
                 Core.Initialize();
                 _libVLC = new LibVLC();
                 _mediaPlayer = new MediaPlayer(_libVLC);
-
-                var videoView = new VideoView
-                {
-                    Dock = DockStyle.Fill,
-                    MediaPlayer = _mediaPlayer,
-                };
-
+                videoView.MediaPlayer = _mediaPlayer;
                 Controls.Add(videoView);
             }
             catch (Exception ex)
@@ -70,8 +62,9 @@ namespace KODI_Cable_Network
             };
         }
 
-        public string channel_title = "Not Provided";
-        public string channel_rating = "Not Provided";
+        private string channel_title = "Not Provided";
+        private string channel_rating = "Not Provided";
+        public Bitmap logo = Properties.Resources.KCN;
 
         private string GetMedia()
         {
@@ -91,7 +84,7 @@ namespace KODI_Cable_Network
                 Console.WriteLine($"Title:");
                 Console.WriteLine($"{title}");
                 Console.WriteLine($"Rating:");
-                Console.WriteLine($"{rating}");
+                Console.WriteLine($"{rating.ToUpper()}");
                 switch (rating.ToUpper())
                 {
                     case "?":
@@ -99,7 +92,7 @@ namespace KODI_Cable_Network
                         Console.WriteLine("Pending Rating (?+)");
                         Console.WriteLine("User prompted with pending content warning.");
                         Console.WriteLine();
-                        if (MessageBox.Show("The channel you selected is not rated.\nDo you want to continue?", "Content Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        if (MessageBox.Show("The channel you selected is unrated.\nDo you want to continue?", "Content Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                         {
                             DoNotContinueInit = true;
                         }
@@ -153,13 +146,48 @@ namespace KODI_Cable_Network
 
         private void LivePlayer_Load(object sender, EventArgs e)
         {
+            int targetSize = 128;
+            double aspectRatio = (double)logo.Width / logo.Height;
+            int width = aspectRatio > 1 ? targetSize : (int)(targetSize * aspectRatio);
+            int height = aspectRatio > 1 ? (int)(targetSize / aspectRatio) : targetSize;
+
+            Bitmap logo_resized = new Bitmap(targetSize, targetSize);
+            using (Graphics g = Graphics.FromImage(logo_resized))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                int x = (targetSize - width) / 2, y = (targetSize - height) / 2;
+                g.DrawImage(logo, new Rectangle(x, y, width, height));
+            }
+
+            LoadingAnimation.Image = logo_resized;
+
             _mediaPlayer.EncounteredError += PlaybackError;
             _mediaPlayer.Buffering += BufferMedia;
             _mediaPlayer.EndReached += EndMedia;
             _mediaPlayer.Opening += OpeningMedia;
             _mediaPlayer.Playing += PlayingMedia;
-            _mediaPlayer.EnableMouseInput = true;
+            _mediaPlayer.EnableMouseInput = false;
             _mediaPlayer.EnableKeyInput = false;
+            videoView.Click += (sending, f) =>
+            {
+                if (_mediaPlayer.IsPlaying)
+                {
+                    _mediaPlayer.SetPause(true);
+                }
+                else
+                {
+                    _mediaPlayer.Time = _mediaPlayer.Media.Duration;
+                    _mediaPlayer.SetPause(false);
+                }
+            };
+            videoView.MouseHover += (sending, f) =>
+            {
+                //HideControls.Stop();
+                //BtnPlayPause.Show();
+                //BtnFullScreen.Show();
+                //BtnClosedCaptions.Show();
+                //HideControls.Start();
+            };
             try
             {
                 _mediaPlayer.Media = new Media(_libVLC, new Uri(GetMedia()));
@@ -182,21 +210,36 @@ namespace KODI_Cable_Network
             //_mediaPlayer.SetMarqueeString(VideoMarqueeOption.Enable | VideoMarqueeOption.Text | VideoMarqueeOption.Refresh, "This is scrolling text at the top.");
         }
 
+        private void HideControls_Tick(object sender, EventArgs e)
+        {
+            BtnPlayPause.Hide();
+            BtnFullScreen.Hide();
+            BtnClosedCaptions.Hide();
+            HideControls.Stop();
+        }
+
         private void BufferMedia(object sender, MediaPlayerBufferingEventArgs e)
         {
             //this.Invoke(new MethodInvoker(() =>
             //{
-                //while (_mediaPlayer.State == VLCState.Buffering)
-                //{
-                //    LoadingAnimation.Show();
-                //}
-                //LoadingAnimation.Hide();
+            //while (_mediaPlayer.State == VLCState.Buffering)
+            //{
+            //    LoadingAnimation.Show();
+            //}
+            //LoadingAnimation.Hide();
             //}));
         }
 
         private void EndMedia(object sender, EventArgs e)
         {
-            
+            DisplayText.Invoke(new MethodInvoker(() =>
+            {
+                //DisplayText.Text = "Connecting";
+                //DisplayText.Show();
+                LoadingAnimation.Show();
+                Thread.Sleep(1000);
+                this.Dispose(true);
+            }));
         }
 
         private void OpeningMedia(object sender, EventArgs e)
@@ -282,7 +325,10 @@ namespace KODI_Cable_Network
             TitleBar.Stop();
             this.Text = "KODI Cable Network";
             _mediaPlayer.Stop();
-            _mediaPlayer.Dispose();
+            if (_mediaPlayer != null)
+            {
+                _mediaPlayer = null;
+            }
         }
 
         private async void TitleBar_Tick(object sender, EventArgs e)
@@ -291,11 +337,11 @@ namespace KODI_Cable_Network
             {
                 if (_mediaPlayer.State != VLCState.Ended && _mediaPlayer.State != VLCState.Stopped && _mediaPlayer.State != VLCState.Error && _mediaPlayer.State != VLCState.NothingSpecial)
                 {
-                    this.Text = $"{channel_title} - {_mediaPlayer.State} at {_mediaPlayer.Fps} FPS - {_mediaPlayer.Time}ms";
+                    this.Text = $"{channel_title} | {_mediaPlayer.State} at {_mediaPlayer.Fps} FPS - {_mediaPlayer.Time}ms";
                 }
                 else
                 {
-                    this.Text = "KODI Cable Network";
+                    this.Text = $"{channel_title} | Disconnected";
                 }
             }
             catch (Exception)

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using KODI_Cable_Network.Properties;
+using System;
+using System.Media;
 using System.Windows.Forms;
 
 namespace KODI_Cable_Network
@@ -10,7 +12,7 @@ namespace KODI_Cable_Network
             InitializeComponent();
         }
 
-        private int Clock = 10;
+        private int Clock = 3;
         private bool AllowExit = false;
 
         private void CloseThisWindow_Tick(object sender, EventArgs e)
@@ -23,7 +25,6 @@ namespace KODI_Cable_Network
                 return;
             }
             Clock--;
-            label2.Text = "Continuing in " + Clock.ToString() + "...";
         }
 
         private void FusionPopup_FormClosing(object sender, FormClosingEventArgs e)
@@ -32,15 +33,16 @@ namespace KODI_Cable_Network
             else e.Cancel = false;
         }
 
-        private void titlebar_Click(object sender, EventArgs e)
-        {
-            CloseThisWindow.Interval = 5;
-        }
+        //private void titlebar_Click(object sender, EventArgs e)
+        //{
+        //    CloseThisWindow.Interval = 5;
+        //}
 
         private void FusionPopup_Load(object sender, EventArgs e)
         {
             //AllowExit = Properties.Settings.Default.NoSplash;
             //this.Close();
+            new SoundPlayer(Resources.jingle).Play();
         }
     }
 }

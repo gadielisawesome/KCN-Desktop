@@ -1,17 +1,14 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace KODI_Cable_Network
@@ -34,29 +31,69 @@ namespace KODI_Cable_Network
             public List<Stream> streams { get; set; }
         }
 
+        //public static void ProcessMessages()
+        //{
+        //    string apiURL = "https://streams.kodicable.net/api/streams";
+
+        //    using (HttpClient client = new HttpClient())
+        //    {
+        //        try
+        //        {
+        //            HttpResponseMessage response = client.GetAsync(apiURL).Result;
+        //            response.EnsureSuccessStatusCode();
+        //            string responseBody = response.Content.ReadAsStringAsync().Result;
+        //            Console.WriteLine(responseBody);
+        //            return responseBody;
+        //        }
+        //        catch (Exception)
+        //        {
+        //            return "";
+        //        }
+        //    }
+        //}
+
+        [DllImport("gdi32.dll")]
+        public static extern int AddFontResourceA(string lpszFilename);
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(int hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+
         [STAThread]
         static void Main()
         {
             //new LivePlayer { Tag = "https://live.kodicable.net/hlscfsp/cfsp/index.m3u8" }.ShowDialog();
             //return;
 
-            Application.EnableVisualStyles();
+            Application.ThreadException += (sender, e) =>
+            {
+                //if (MessageBox.Show("KCN Desktop encountered an error.\nSend exception data to the developers? (uses webhook)", "Unfavorable Circumstances", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                //{
+                //    return;
+                //}
+                MessageBox.Show($"An error caused KCN Desktop to shutdown.\n{e.Exception.Message} {e.Exception.Source}");
+                Application.Exit();
+            };
 
-            new FusionPopup().ShowDialog();
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            FontLoader();
+
+            if (Properties.Settings.Default.FirstPowerOn)
+            {
+                Properties.Settings.Default.FirstPowerOn = false;
+                new FusionPopup().ShowDialog();
+            }
 
             if (!Directory.Exists("libvlc"))
             {
-                if (MessageBox.Show("libvlc is not downloaded.\nDownload it now?", "Required Reference Not Found", MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes)
-                {
-                    return;
-                }
-
+                MessageBox.Show("libvlc isn't available. Please re-download KCN Desktop.", "Required Reference Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
-            StreamList strList = new StreamList();
-            strList.Show();
-
-            Thread.Sleep(500);
+            // Add MOTD or something for the title bar
 
             string jsonResponse = GetAPIData();
 
@@ -66,22 +103,74 @@ namespace KODI_Cable_Network
                 return;
             }
 
+            StartConfiguration(jsonResponse);
+
+            Application.Run();
+        }
+
+        private static void FontLoader()
+        {
+            //string tempFontPathA = Path.GetTempPath() + "Montserrat_Regular.ttf";
+            //string tempFontPathB = Path.GetTempPath() + "Montserrat_SemiBold.ttf";
+
+            //try
+            //{
+            //    FileStream fileA = new FileStream(tempFontPathA, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+            //    byte[] fontBytesA = Properties.Resources.Montserrat_Regular;
+            //    fileA.Write(fontBytesA, 0, fontBytesA.Length);
+            //    fileA.Flush();
+            //    fileA.Close();
+
+            //    FileStream fileB = new FileStream(tempFontPathA, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+            //    byte[] fontBytesB = Properties.Resources.Montserrat_SemiBold;
+            //    fileB.Write(fontBytesB, 0, fontBytesB.Length);
+            //    fileB.Flush();
+            //    fileB.Close();
+
+            //    int result = AddFontResourceA(tempFontPathA);
+
+            //    Console.WriteLine(result != 0 ? "Font added to system font table." : "Failed to add font to system font table.");
+
+
+            //    //File.SetAttributes(tempFontPath, FileAttributes.Normal);
+            //    //File.Delete(tempFontPath);
+
+            //    if (result != 0) SendMessage(0xFFFF, 0x001D, IntPtr.Zero, IntPtr.Zero);
+            //}
+            //catch (Exception)
+            //{
+            //    return;
+            //}
+        }
+
+        static StreamList strList;
+
+        static private void StartConfiguration(string JSON)
+        {
             try
             {
-                StreamResponse response = JsonConvert.DeserializeObject<StreamResponse>(jsonResponse);
+                StreamResponse response = JsonConvert.DeserializeObject<StreamResponse>(JSON);
 
                 int panelY = 5;
                 bool RedirectStream = false;
 
-                Console.Beep();
-                Console.Write("Type a *.m3u8 URL to redirect all channels (leave empty to disable): ");
-                string output = Console.ReadLine();
-                if (output != "")
+                //Console.Beep();
+                //Console.Write("Type a *.m3u8 URL to redirect all channels (leave empty to disable): ");
+                //string output = Console.ReadLine();
+                //if (output != "")
+                //{
+                //    RedirectStream = true;
+                //    output = $"{output}|External Live Stream|UNDEFINED";
+                //    // https://adultswim-vodlive.cdn.turner.com/live/rick-and-morty/stream.m3u8|Rick and Morty [Adult Swim]|M
+                //}
+
+                if (!(strList is null))
                 {
-                    RedirectStream = true;
-                    output = $"{output}|External Live Stream|UNDEFINED";
-                    // https://adultswim-vodlive.cdn.turner.com/live/rick-and-morty/stream.m3u8|Rick and Morty [Adult Swim]|M
+                    strList.Dispose();
+                    strList = null;
                 }
+                strList = new StreamList();
+                strList.Show();
 
                 foreach (var stream in response.streams)
                 {
@@ -95,8 +184,22 @@ namespace KODI_Cable_Network
                     Console.WriteLine($"Description: {stream.description}");
                     Console.WriteLine();
 
+                    //stream.live = "Yes";
+
                     strList.Invoke(new MethodInvoker(() =>
                     {
+                        Font MontserratSemiBoldTitle = null;
+                        // 24
+                        FontFamily MontSemiBold = FontFamily.Families.FirstOrDefault(f => f.Name == "Montserrat SemiBold");
+                        if (MontSemiBold != null) MontserratSemiBoldTitle = new Font(MontSemiBold, 24, FontStyle.Regular, GraphicsUnit.Point);
+                        else MontserratSemiBoldTitle = new Font("Segoe UI", 24, FontStyle.Regular, GraphicsUnit.Point);
+
+                        Font MontserratRegularDescription = null;
+                        // 17
+                        FontFamily MontRegular = FontFamily.Families.FirstOrDefault(f => f.Name == "Montserrat");
+                        if (MontRegular != null) MontserratRegularDescription = new Font(MontRegular, 17, FontStyle.Regular, GraphicsUnit.Point);
+                        else MontserratRegularDescription = new Font("Segoe UI", 17, FontStyle.Regular, GraphicsUnit.Point);
+
                         if (stream.title.Contains("|"))
                         {
                             stream.title = stream.title.Replace("|", "⚫");
@@ -107,18 +210,54 @@ namespace KODI_Cable_Network
                             stream.rating = "?";
                         }
 
-                        string BNUPipeFormat = "https://localhost/index.m3u8";
+                        string BNUPipeFormat = "https://localhost/index.m3u8|Unknown|UNDEFINED";
 
                         if (RedirectStream)
                         {
                             stream.live = "Yes";
-                            BNUPipeFormat = output;
-                        } else BNUPipeFormat = $"{stream.url}|{stream.title}|{stream.rating}";
+                            //BNUPipeFormat = output;
+                        }
+                        else BNUPipeFormat = $"{stream.url}|{stream.title}|{stream.rating}";
+
+                        Icon icon = null;
+                        Bitmap bitmap = null;
+
+                        try
+                        {
+                            using (WebClient webClient = new WebClient())
+                            {
+                                string imageUrl = $"https://kodicable.net/images/channel_logos/{stream.name.ToLower()}.png";
+
+                                // Download the image
+                                byte[] data = webClient.DownloadData(imageUrl);
+
+                                // Check if the data is not empty
+                                if (data != null && data.Length > 0)
+                                {
+                                    using (MemoryStream memoryStream = new MemoryStream(data))
+                                    {
+                                        // Create a Bitmap from the image
+                                        bitmap = new Bitmap(memoryStream);
+
+                                        // Convert the Bitmap to an Icon
+                                        icon = Icon.FromHandle(bitmap.GetHicon());
+                                    }
+                                }
+                                else
+                                {
+                                    icon = null;
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            icon = null;
+                        }
 
                         // Create a new Panel for each stream
                         Panel streamPanel = new Panel
                         {
-                            Width = 911, // Adjust the width as needed
+                            Width = 947, // Adjust the width as needed
                             Height = 135, // Adjust the height as needed
                             BackColor = Color.FromArgb(60, 60, 60), // Set the background color
                             ForeColor = Color.White,
@@ -126,12 +265,15 @@ namespace KODI_Cable_Network
                             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                             AutoSize = false
                         };
+                        //BackColor = Color.FromArgb(60, 60, 60); // Set the background color
                         streamPanel.MouseClick += (sender, e) =>
                         {
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    new LivePlayer { Tag = BNUPipeFormat }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
+                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -166,7 +308,9 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    new LivePlayer { Tag = BNUPipeFormat }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
+                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -235,7 +379,24 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    MessageBox.Show($"BNU Rating: {stream.rating.ToUpper()}", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    switch (stream.rating.ToUpper())
+                                    {
+                                        case "E":
+                                            MessageBox.Show($"BNU Rating: Everyone (0+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            break;
+                                        case "P":
+                                            MessageBox.Show($"BNU Rating: Parental Guidance (7+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            break;
+                                        case "S":
+                                            MessageBox.Show($"BNU Rating: Suggestive (13+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            break;
+                                        case "M":
+                                            MessageBox.Show($"BNU Rating: Mature (18+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            break;
+                                        default:
+                                            MessageBox.Show($"BNU Rating: Pending Rating (?+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            break;
+                                    }
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -248,6 +409,8 @@ namespace KODI_Cable_Network
                         Label titleLabel = new Label();
                         if (stream.live == "Yes")
                         {
+                            // ⏣
+                            //titleLabel.Text = Regex.Replace(stream.title, @"\p{Cs} ", "");
                             titleLabel.Text = stream.title;
                             titleLabel.ForeColor = Color.White;
                         }
@@ -256,8 +419,9 @@ namespace KODI_Cable_Network
                             titleLabel.Text = "Channel is off the air";
                             titleLabel.ForeColor = Color.Gray;
                         }
-                        titleLabel.Font = new Font("Segoe UI Symbol", 24, FontStyle.Bold, GraphicsUnit.Point, 0);
-                        titleLabel.Location = new Point(245, 0);
+
+                        titleLabel.Font = MontserratSemiBoldTitle;
+                        titleLabel.Location = new Point(240, 0);
                         titleLabel.Size = new Size(660, 50);
                         titleLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
                         titleLabel.AutoSize = true;
@@ -266,7 +430,9 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    new LivePlayer { Tag = BNUPipeFormat }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
+                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -292,9 +458,9 @@ namespace KODI_Cable_Network
                             descriptionLabel.Text = "No description available while channel is offline.";
                             descriptionLabel.ForeColor = Color.Gray;
                         }
-                        descriptionLabel.Font = new Font("Segoe UI Symbol", 17, FontStyle.Regular, GraphicsUnit.Point, 0);
-                        descriptionLabel.Location = new Point(245, 45);
-                        descriptionLabel.Size = new Size(668, 85);
+                        descriptionLabel.Font = MontserratRegularDescription;
+                        descriptionLabel.Location = new Point(242, 40);
+                        descriptionLabel.Size = new Size(670, 90);
                         descriptionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
                         descriptionLabel.AutoSize = false;
                         descriptionLabel.MouseClick += (sender, e) =>
@@ -302,7 +468,9 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    new LivePlayer { Tag = BNUPipeFormat }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Hide()));
+                                    new LivePlayer { Tag = BNUPipeFormat, Icon = icon, logo = bitmap }.ShowDialog();
+                                    strList.Invoke((MethodInvoker)(() => strList.Show()));
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -311,19 +479,7 @@ namespace KODI_Cable_Network
                             }
                         };
 
-                        // Create a Label for the stream rating
-                        Label ratingLabel = new Label
-                        {
-                            Text = $"Rated: {stream.rating}",
-                            Font = new Font("Segoe UI Semibold", 9, FontStyle.Italic, GraphicsUnit.Point, 0),
-                            Location = new Point(265, 105),
-                            Size = new Size(160, 25),
-                            //ratingLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-                            TextAlign = ContentAlignment.BottomLeft
-                        };
-
                         // Add controls to the streamPanel
-                        //streamPanel.Controls.Add(ratingLabel);
                         streamPanel.Controls.Add(iconPictureBox);
                         streamPanel.Controls.Add(ratingPictureBox);
                         streamPanel.Controls.Add(thumbnailPictureBox);
@@ -348,19 +504,17 @@ namespace KODI_Cable_Network
                 Console.WriteLine("Error deserializing JSON: " + ex.Message);
                 return;
             }
-
-            Application.Run();
         }
 
         static private string GetAPIData()
         {
-            string apiUrl = "https://streams.kodicable.net/api/streams";
+            string apiURL = "https://streams.kodicable.net/api/streams";
 
             using (HttpClient client = new HttpClient())
             {
                 try
                 {
-                    HttpResponseMessage response = client.GetAsync(apiUrl).Result;
+                    HttpResponseMessage response = client.GetAsync(apiURL).Result;
                     response.EnsureSuccessStatusCode();
                     string responseBody = response.Content.ReadAsStringAsync().Result;
                     Console.WriteLine(responseBody);
