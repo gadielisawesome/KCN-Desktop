@@ -12,6 +12,24 @@ using static KODI_Cable_Network.Program;
 
 namespace KODI_Cable_Network
 {
+    public class MyMessageFilter : IMessageFilter
+    {
+        const int WM_KEYDOWN = 0x0100;
+        const int VK_F1 = 0x70; // Virtual Key Code for F1
+
+        public bool PreFilterMessage(ref Message m)
+        {
+            if (m.Msg == WM_KEYDOWN && (int)m.WParam == VK_F1)
+            {
+                MessageBox.Show("", MessageBox.Event.Information, MessageBoxButtons.OK);
+                return true; // Mark the message as handled
+            }
+
+            return false; // Continue processing the message
+        }
+
+    }
+
     internal static class Program
     {
         public class Stream
@@ -66,8 +84,8 @@ namespace KODI_Cable_Network
                 //{
                 //    return;
                 //}
-                MessageBox.Show($"An error caused KCN Desktop to shutdown.\n{e.Exception.Message} {e.Exception.Source}");
-                Application.Exit();
+                MessageBox.Show($"An error caused KCN Desktop to shutdown.\n{e.Exception.Message} {e.Exception.Source}", MessageBox.Event.Error, MessageBoxButtons.OK);
+                Environment.FailFast($"{e.Exception}", e.Exception);
             };
 
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
@@ -75,11 +93,14 @@ namespace KODI_Cable_Network
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            MyMessageFilter messageFilter = new MyMessageFilter();
+            Application.AddMessageFilter(messageFilter);
+
             FontLoader();
 
             if (!Directory.Exists("libvlc"))
             {
-                MessageBox.Show("libvlc isn't available. Please re-download KCN Desktop.", "Required Reference Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("libvlc isn't available. Please re-download KCN Desktop.", MessageBox.Event.Error, MessageBoxButtons.OK);
                 return;
             }
 
@@ -105,7 +126,7 @@ namespace KODI_Cable_Network
 
                                     if (JSON == "")
                                     {
-                                        MessageBox.Show("Could not get data from KCN.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        MessageBox.Show("Could not get data from KCN.", MessageBox.Event.Console, MessageBoxButtons.OK);
                                         return;
                                     }
 
@@ -152,7 +173,7 @@ namespace KODI_Cable_Network
 
                                     if (string.IsNullOrEmpty(BNUPipeFormat))
                                     {
-                                        MessageBox.Show("Channel not found.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        MessageBox.Show("Channel not found.", MessageBox.Event.Console, MessageBoxButtons.OK);
                                         return;
                                     }
 
@@ -162,28 +183,42 @@ namespace KODI_Cable_Network
                                 }
                                 else
                                 {
-                                    MessageBox.Show("The provided arguments are invalid.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("The provided arguments are invalid.", MessageBox.Event.Console, MessageBoxButtons.OK);
                                     return;
                                 }
                             }
                             if (arg == "-reset")
                             {
                                 Properties.Settings.Default.Reset();
-                                MessageBox.Show("Application reset successfully.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                MessageBox.Show("Application reset successfully.", MessageBox.Event.Console, MessageBoxButtons.OK);
                                 return;
                             }
-                            MessageBox.Show("The arguments are invalid.", "Argument Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            if (arg == "-dark")
+                            {
+                                Properties.Settings.Default.DarkMode = true;
+                                Properties.Settings.Default.Save();
+                                MessageBox.Show("Settings saved successfully.", MessageBox.Event.Console, MessageBoxButtons.OK);
+                                return;
+                            }
+                            if (arg == "-light")
+                            {
+                                Properties.Settings.Default.DarkMode = false;
+                                Properties.Settings.Default.Save();
+                                MessageBox.Show("Settings saved successfully.", MessageBox.Event.Console, MessageBoxButtons.OK);
+                                return;
+                            }
+                            MessageBox.Show("The arguments are invalid.", MessageBox.Event.Console, MessageBoxButtons.OK);
                             return;
                     }
                     argument_count++;
                 }
             }
 
-            if (Properties.Settings.Default.FirstPowerOn)
+            //if (Properties.Settings.Default.FirstPowerOn)
             {
                 Properties.Settings.Default.FirstPowerOn = false;
                 Properties.Settings.Default.Save();
-                new FusionPopup().ShowDialog();
+                new FusionFirstTime().ShowDialog();
             }
 
             if (!OpenStreamUI()) Environment.Exit(0);
@@ -246,7 +281,7 @@ namespace KODI_Cable_Network
 
                 if (JSON == "")
                 {
-                    MessageBox.Show("Could not get data from KCN.", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Could not get data from KCN.", MessageBox.Event.Error, MessageBoxButtons.OK);
                     return false;
                 }
 
@@ -515,7 +550,7 @@ namespace KODI_Cable_Network
                             switch (e.Button)
                             {
                                 case MouseButtons.Left:
-                                    MessageBox.Show($"KCN Callsign: {stream.name.ToUpper()}", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    MessageBox.Show($"KCN Callsign: {stream.name.ToUpper()}", MessageBox.Event.Information, MessageBoxButtons.OK);
                                     break;
                                 case MouseButtons.Right:
                                     break;
@@ -561,19 +596,19 @@ namespace KODI_Cable_Network
                                     switch (stream.rating.ToUpper())
                                     {
                                         case "E":
-                                            MessageBox.Show($"BNU Rating: Everyone (0+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            MessageBox.Show($"BNU Rating: Everyone (0+)", MessageBox.Event.Information, MessageBoxButtons.OK);
                                             break;
                                         case "P":
-                                            MessageBox.Show($"BNU Rating: Parental Guidance (7+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            MessageBox.Show($"BNU Rating: Parental Guidance (7+)", MessageBox.Event.Information, MessageBoxButtons.OK);
                                             break;
                                         case "S":
-                                            MessageBox.Show($"BNU Rating: Suggestive (13+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            MessageBox.Show($"BNU Rating: Suggestive (13+)", MessageBox.Event.Information, MessageBoxButtons.OK);
                                             break;
                                         case "M":
-                                            MessageBox.Show($"BNU Rating: Mature (18+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            MessageBox.Show($"BNU Rating: Mature (18+)", MessageBox.Event.Information, MessageBoxButtons.OK);
                                             break;
                                         default:
-                                            MessageBox.Show($"BNU Rating: Pending Rating (?+)", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            MessageBox.Show($"BNU Rating: Pending Rating (?+)", MessageBox.Event.Information, MessageBoxButtons.OK);
                                             break;
                                     }
                                     break;
@@ -639,14 +674,6 @@ namespace KODI_Cable_Network
                             if (string.IsNullOrEmpty(stream.description))
                             {
                                 descriptionLabel.Text = "The channel has not provided a description.";
-                                if (DarkMode)
-                                {
-                                    descriptionLabel.ForeColor = Color.LightGray;
-                                }
-                                else
-                                {
-                                    descriptionLabel.ForeColor = Color.Gray;
-                                }
                                 descriptionLabel.ForeColor = Color.Gray;
                             }
                             else
@@ -665,14 +692,7 @@ namespace KODI_Cable_Network
                         else
                         {
                             descriptionLabel.Text = "No description available while channel is offline.";
-                            if (DarkMode)
-                            {
-                                descriptionLabel.ForeColor = Color.LightGray;
-                            }
-                            else
-                            {
-                                descriptionLabel.ForeColor = Color.Gray;
-                            }
+                            descriptionLabel.ForeColor = Color.Gray;
                         }
                         descriptionLabel.Font = MontserratRegularDescription;
                         descriptionLabel.Location = new Point(242, 40);
@@ -806,6 +826,42 @@ namespace KODI_Cable_Network
             {
                 return Properties.Resources.Unavailable;
             }
+        }
+    }
+
+    class MessageBox
+    {
+        //internal static DialogResult Show(string message, Event event_type)
+        //{
+        //    return Show(message, event_type, MessageBoxButtons.OK);
+        //}
+
+        internal static DialogResult Show(string message, Event event_type, MessageBoxButtons buttons)
+        {
+            switch (event_type)
+            {
+                case Event.Information:
+                    return System.Windows.Forms.MessageBox.Show(message, "KCN Desktop", buttons, MessageBoxIcon.Information);
+                case Event.Question:
+                    return System.Windows.Forms.MessageBox.Show(message, "KCN Desktop", buttons, MessageBoxIcon.Question);
+                case Event.Warning:
+                    return System.Windows.Forms.MessageBox.Show(message, "KCN Desktop - Warning", buttons, MessageBoxIcon.Warning);
+                case Event.Error:
+                    return System.Windows.Forms.MessageBox.Show(message, "KCN Desktop - Error", buttons, MessageBoxIcon.Error);
+                case Event.Console:
+                    return System.Windows.Forms.MessageBox.Show(message, "KCN Desktop - Console Message", buttons, MessageBoxIcon.None);
+                default:
+                    return System.Windows.Forms.MessageBox.Show(message, "KCN Desktop - Unrecognized Message", buttons, MessageBoxIcon.None);
+            };
+        }
+
+        internal enum Event
+        {
+            Information,
+            Question,
+            Warning,
+            Error,
+            Console,
         }
     }
 }

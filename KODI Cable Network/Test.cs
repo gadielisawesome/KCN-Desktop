@@ -11,13 +11,6 @@ namespace KODI_Cable_Network
         public Test()
         {
             InitializeComponent();
-            timer = new Timer
-            {
-                Interval = 10 // Set the timer interval in milliseconds
-            };
-            timer.Tick += timer_Tick;
-            startTime = DateTime.Now;
-            timer.Start();
         }
 
         private void timer_Tick(object sender, EventArgs e)
@@ -35,6 +28,17 @@ namespace KODI_Cable_Network
                 label1.Left = this.Width;
                 startTime = DateTime.Now;
             }
+        }
+
+        private void Test_Load(object sender, EventArgs e)
+        {
+            timer = new Timer
+            {
+                Interval = 10 // Set the timer interval in milliseconds
+            };
+            timer.Tick += timer_Tick;
+            startTime = DateTime.Now;
+            timer.Start();
         }
     }
 }

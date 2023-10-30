@@ -116,6 +116,12 @@
     <Compile Include="Emergency.Designer.cs">
       <DependentUpon>Emergency.cs</DependentUpon>
     </Compile>
+    <Compile Include="FusionFirstTime.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FusionFirstTime.Designer.cs">
+      <DependentUpon>FusionFirstTime.cs</DependentUpon>
+    </Compile>
     <Compile Include="FusionPopup.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,6 +151,9 @@
     </Compile>
     <EmbeddedResource Include="Emergency.resx">
       <DependentUpon>Emergency.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FusionFirstTime.resx">
+      <DependentUpon>FusionFirstTime.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FusionPopup.resx">
       <DependentUpon>FusionPopup.cs</DependentUpon>
@@ -216,6 +225,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="KCNLogo.ico" />
+    <Content Include="KCNStinger.mp4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="KCNStinger_Halloween.mp4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\UnavailableL.png" />
     <None Include="Resources\LOAD.png" />
     <None Include="jingle.wav" />

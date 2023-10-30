@@ -25,11 +25,11 @@ namespace KODI_Cable_Network
                 _libVLC = new LibVLC();
                 _mediaPlayer = new MediaPlayer(_libVLC);
                 videoView.MediaPlayer = _mediaPlayer;
-                Controls.Add(videoView);
+                this.Controls.Add(videoView);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error has occurred.\n" + ex.Message);
+                MessageBox.Show("An error has occurred.\n" + ex.Message, MessageBox.Event.Error, MessageBoxButtons.OK);
                 this.Close();
             }
             KeyPreview = true;
@@ -93,7 +93,7 @@ namespace KODI_Cable_Network
                         Console.WriteLine("Pending Rating (?+)");
                         Console.WriteLine("User prompted with pending content warning.");
                         Console.WriteLine();
-                        if (MessageBox.Show("The channel you selected is unrated.\nDo you want to continue?", "Content Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        if (MessageBox.Show("The channel you selected is unrated.\nDo you want to continue?", MessageBox.Event.Question, MessageBoxButtons.YesNo) != DialogResult.Yes)
                         {
                             DoNotContinueInit = true;
                         }
@@ -118,7 +118,7 @@ namespace KODI_Cable_Network
                         Console.WriteLine("Mature (18+)");
                         Console.WriteLine("User prompted with mature content warning.");
                         Console.WriteLine();
-                        if (MessageBox.Show("The channel you selected is rated mature.\nDo you want to continue?", "Content Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        if (MessageBox.Show("The channel you selected is rated mature.\nDo you want to continue?", MessageBox.Event.Question, MessageBoxButtons.YesNo) != DialogResult.Yes)
                         {
                             DoNotContinueInit = true;
                         }
@@ -128,7 +128,7 @@ namespace KODI_Cable_Network
                         Console.WriteLine("Unknown (?+)");
                         Console.WriteLine("User prompted with unknown rating content warning.");
                         Console.WriteLine();
-                        if (MessageBox.Show("The channel you selected has an unknown rating.\nDo you want to continue?", "Content Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        if (MessageBox.Show("The channel you selected has an unknown rating.\nDo you want to continue?", MessageBox.Event.Question, MessageBoxButtons.YesNo) != DialogResult.Yes)
                         {
                             DoNotContinueInit = true;
                         }
@@ -137,7 +137,7 @@ namespace KODI_Cable_Network
             }
             else
             {
-                MessageBox.Show("The channel selected is unsupported.", "Unsupported Content", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("The channel selected is unsupported.", MessageBox.Event.Error, MessageBoxButtons.OK);
                 DoNotContinueInit = true;
                 return "https://localhost/index.m3u8";
             }
@@ -169,16 +169,25 @@ namespace KODI_Cable_Network
             _mediaPlayer.Playing += PlayingMedia;
             _mediaPlayer.EnableMouseInput = false;
             _mediaPlayer.EnableKeyInput = false;
-            videoView.Click += (sending, f) =>
+            videoView.MouseClick += (sending, f) =>
             {
-                if (_mediaPlayer.IsPlaying)
+                switch (f.Button)
                 {
-                    _mediaPlayer.SetPause(true);
-                }
-                else
-                {
-                    _mediaPlayer.Time = _mediaPlayer.Media.Duration;
-                    _mediaPlayer.SetPause(false);
+                    case MouseButtons.Left:
+                        if (_mediaPlayer.IsPlaying)
+                        {
+                            _mediaPlayer.SetPause(true);
+                        }
+                        else
+                        {
+                            _mediaPlayer.Time = _mediaPlayer.Media.Duration;
+                            _mediaPlayer.SetPause(false);
+                        }
+                        break;
+                    case MouseButtons.Right:
+                        break;
+                    default:
+                        break;
                 }
             };
             videoView.MouseHover += (sending, f) =>
@@ -197,7 +206,7 @@ namespace KODI_Cable_Network
             {
                 Console.WriteLine("The URL provided is invalid. Cannot continue.");
                 Console.WriteLine();
-                MessageBox.Show("The URL provided from the server was invalid.", "Invalid URL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("The URL provided from the server was invalid.", MessageBox.Event.Error, MessageBoxButtons.OK);
                 this.Close();
                 return;
             }
@@ -272,7 +281,7 @@ namespace KODI_Cable_Network
                 //DisplayText.Text = "Could not connect";
                 //DisplayText.Show();
                 LoadingAnimation.Show();
-                MessageBox.Show("This stream is currently unavailable.", "KODI Cable Network", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("This stream is currently unavailable.", MessageBox.Event.Error, MessageBoxButtons.OK);
                 this.Dispose(true);
             }));
         }
@@ -353,6 +362,24 @@ namespace KODI_Cable_Network
         }
 
         private void BtnSnapshot_Click(object sender, EventArgs e)
+        {
+            BtnPlayPause.Focus();
+            _mediaPlayer.TakeSnapshot(0, $"{DateTime.Now.ToString("s").Replace(":", "-")}.png", 0, 0);
+            Thread.Sleep(1000);
+        }
+
+        private void informationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("This project uses LibVLC for playback.", MessageBox.Event.Information, MessageBoxButtons.OK);
+        }
+
+        private void fullscreenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BtnPlayPause.Focus();
+            TriggerFullScreen();
+        }
+
+        private void snapshotToolStripMenuItem_Click(object sender, EventArgs e)
         {
             BtnPlayPause.Focus();
             _mediaPlayer.TakeSnapshot(0, $"{DateTime.Now.ToString("s").Replace(":", "-")}.png", 0, 0);

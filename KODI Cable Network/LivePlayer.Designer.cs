@@ -38,8 +38,14 @@
             this.Checker = new System.Windows.Forms.Timer(this.components);
             this.BtnPlayPause = new System.Windows.Forms.PictureBox();
             this.LoadingAnimation = new System.Windows.Forms.PictureBox();
+            this.AckStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.informationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.fullscreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.snapshotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.BtnPlayPause)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.LoadingAnimation)).BeginInit();
+            this.AckStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // DisplayText
@@ -127,6 +133,43 @@
             this.LoadingAnimation.TabIndex = 1;
             this.LoadingAnimation.TabStop = false;
             // 
+            // AckStrip
+            // 
+            this.AckStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.informationToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.fullscreenToolStripMenuItem,
+            this.snapshotToolStripMenuItem});
+            this.AckStrip.Name = "RightClick";
+            this.AckStrip.Size = new System.Drawing.Size(181, 98);
+            // 
+            // informationToolStripMenuItem
+            // 
+            this.informationToolStripMenuItem.Name = "informationToolStripMenuItem";
+            this.informationToolStripMenuItem.ShortcutKeyDisplayString = "";
+            this.informationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.informationToolStripMenuItem.Text = "&Information";
+            this.informationToolStripMenuItem.Click += new System.EventHandler(this.informationToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // fullscreenToolStripMenuItem
+            // 
+            this.fullscreenToolStripMenuItem.Name = "fullscreenToolStripMenuItem";
+            this.fullscreenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fullscreenToolStripMenuItem.Text = "Fullscreen";
+            this.fullscreenToolStripMenuItem.Click += new System.EventHandler(this.fullscreenToolStripMenuItem_Click);
+            // 
+            // snapshotToolStripMenuItem
+            // 
+            this.snapshotToolStripMenuItem.Name = "snapshotToolStripMenuItem";
+            this.snapshotToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.snapshotToolStripMenuItem.Text = "Snapshot";
+            this.snapshotToolStripMenuItem.Click += new System.EventHandler(this.snapshotToolStripMenuItem_Click);
+            // 
             // LivePlayer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -152,6 +195,7 @@
             this.Load += new System.EventHandler(this.LivePlayer_Load);
             ((System.ComponentModel.ISupportInitialize)(this.BtnPlayPause)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.LoadingAnimation)).EndInit();
+            this.AckStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -166,5 +210,10 @@
         private System.Windows.Forms.PictureBox BtnPlayPause;
         private System.Windows.Forms.Timer HideControls;
         private System.Windows.Forms.Timer Checker;
+        private System.Windows.Forms.ContextMenuStrip AckStrip;
+        private System.Windows.Forms.ToolStripMenuItem informationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem fullscreenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem snapshotToolStripMenuItem;
     }
 }
